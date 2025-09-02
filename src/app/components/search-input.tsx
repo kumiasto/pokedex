@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { debounce } from "../helpers/debounce";
+import { debounce } from "../lib/helpers/debounce";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 
 function SearchInput() {
@@ -19,10 +19,9 @@ function SearchInput() {
     replace(`${pathname}?${params.toString()}`);
   }, 300);
 
-  console.log(searchParams);
-
   return (
     <input
+      name="pokemon"
       className="search bg-gray-50 text-gray-900 p-3 rounded-xl"
       placeholder="Who’s that Pokémon?"
       onChange={(e) => handleSearch(e.target.value)}
