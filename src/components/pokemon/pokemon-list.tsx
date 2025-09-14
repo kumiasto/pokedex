@@ -55,7 +55,8 @@ export default function PokemonList({
           }
         },
         {
-          threshold: 0.1,
+          rootMargin: "600px 0px",
+          threshold: 0,
         },
       );
       observer.observe(loadMoreRef.current);
@@ -99,8 +100,12 @@ export default function PokemonList({
   return (
     <section className="w-full flex flex-col content mt-3">
       <ListWrapper>
-        {items.map((pokemon) => (
-          <Pokemon pokemon={pokemon} key={pokemon.id} />
+        {items.map((pokemon, idx) => (
+          <Pokemon
+            pokemon={pokemon}
+            key={pokemon.id}
+            priority={page === 1 && idx < 6 && !query}
+          />
         ))}
       </ListWrapper>
       {hasMore && (

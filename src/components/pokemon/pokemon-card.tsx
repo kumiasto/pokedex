@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import type { Pokemon } from "@/lib/types/pokemon";
 import clsx from "clsx";
 
-function Pokemon({ pokemon }: { pokemon: Pokemon }) {
+function Pokemon({ pokemon, priority = false }: { pokemon: Pokemon; priority?: boolean }) {
   const router = useRouter();
   const [loaded, setLoaded] = useState(false);
 
@@ -26,7 +26,8 @@ function Pokemon({ pokemon }: { pokemon: Pokemon }) {
             "object-contain transition-opacity duration-300 ease-out",
             loaded ? "opacity-100" : "opacity-0",
           )}
-          unoptimized
+          sizes="75px"
+          priority={priority}
           onLoadingComplete={() => setLoaded(true)}
         />
       </div>
