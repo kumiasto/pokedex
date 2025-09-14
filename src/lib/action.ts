@@ -1,7 +1,11 @@
-import type { Pokemon, PokemonDetails, PokemonEvolution } from "@/lib/types/pokemon";
+import type {
+  Pokemon,
+  PokemonDetails,
+  PokemonEvolution,
+} from "@/lib/types/pokemon";
 
-type PokeAPITypesEntry = { type: { name: string; url: string } };
-type PokeAPISprites = {
+type TypesEntry = { type: { name: string; url: string } };
+type Sprites = {
   front_default?: string | null;
   other?: {
     home?: { front_default?: string | null };
@@ -9,23 +13,23 @@ type PokeAPISprites = {
     showdown?: { front_default?: string | null };
   };
 };
-type PokeAPIAbility = { ability: { name: string } };
-type PokeAPIStat = { base_stat: number; stat: { name: string } };
-type PokeAPIPokemon = {
+type Ability = { ability: { name: string } };
+type Stat = { base_stat: number; stat: { name: string } };
+type Pokemon = {
   id: number;
   name: string;
-  sprites: PokeAPISprites;
-  types: PokeAPITypesEntry[];
-  abilities: PokeAPIAbility[];
-  stats: PokeAPIStat[];
+  sprites: Sprites;
+  types: TypesEntry[];
+  abilities: Ability[];
+  stats: Stat[];
   height: number;
   weight: number;
   base_experience: number;
 };
-type PokeAPISpecies = { evolution_chain?: { url?: string } };
+type Species = { evolution_chain?: { url?: string } };
 type EvolutionNode = { species: { name: string }; evolves_to: EvolutionNode[] };
-type PokeAPIEvolutionChain = { chain: EvolutionNode };
-type PokeAPIType = { damage_relations?: { double_damage_from?: { name: string }[] } };
+type EvolutionChain = { chain: EvolutionNode };
+type Type = { damage_relations?: { double_damage_from?: { name: string }[] } };
 
 export async function getPokemon(
   query: string | undefined,
@@ -37,7 +41,7 @@ export async function getPokemon(
   try {
     const response = await fetch(API_URL);
     if (!response.ok) return null;
-    const pokemon: PokeAPIPokemon = await response.json();
+    const pokemon: Pokemon = await response.json();
 
     const image =
       pokemon?.sprites?.other?.home?.front_default ??
@@ -64,28 +68,31 @@ export async function getPokemons(offset: number): Promise<Pokemon[]> {
   try {
     const response = await fetch(API_URL);
     if (!response.ok) return [];
-    const { results }: { results: { name: string; url: string }[] } = await response.json();
+    const { results }: { results: { name: string; url: string }[] } =
+      await response.json();
 
-    const pokemons: Array<PokeAPIPokemon | null> = await Promise.all(
+    const pokemons: Array<Pokemon | null> = await Promise.all(
       results.map(async ({ url }) => {
         const res = await fetch(url);
         if (!res.ok) return null;
-        const poke: PokeAPIPokemon = await res.json();
+        const poke: Pokemon = await res.json();
         return poke;
       }),
     );
 
-    return pokemons.filter((p): p is PokeAPIPokemon => Boolean(p)).map((pokemon) => ({
-      id: pokemon.id,
-      name: pokemon.name,
-      image:
-        pokemon?.sprites?.other?.home?.front_default ??
-        pokemon?.sprites?.other?.["official-artwork"]?.front_default ??
-        pokemon?.sprites?.front_default ??
-        pokemon?.sprites?.other?.showdown?.front_default ??
-        "/vercel.svg",
-      types: pokemon.types.map((t) => t.type.name),
-    }));
+    return pokemons
+      .filter((p): p is Pokemon => Boolean(p))
+      .map((pokemon) => ({
+        id: pokemon.id,
+        name: pokemon.name,
+        image:
+          pokemon?.sprites?.other?.home?.front_default ??
+          pokemon?.sprites?.other?.["official-artwork"]?.front_default ??
+          pokemon?.sprites?.front_default ??
+          pokemon?.sprites?.other?.showdown?.front_default ??
+          "/vercel.svg",
+        types: pokemon.types.map((t) => t.type.name),
+      }));
   } catch (e) {
     console.error("Pokemon list fetch failed:", e);
     return [];
@@ -101,7 +108,7 @@ export async function getPokemonDetails(
   try {
     const res = await fetch(API_URL);
     if (!res.ok) return null;
-    const pokemon: PokeAPIPokemon = await res.json();
+    const pokemon: Pokemon = await res.json();
 
     const image =
       pokemon?.sprites?.other?.home?.front_default ??
@@ -110,20 +117,24 @@ export async function getPokemonDetails(
       pokemon?.sprites?.other?.showdown?.front_default ??
       "/vercel.svg";
 
-    const abilities: string[] = pokemon.abilities?.map((a) => a.ability.name).filter(Boolean);
+    const abilities: string[] = pokemon.abilities
+      ?.map((a) => a.ability.name)
+      .filter(Boolean);
 
-    const stats: { name: string; value: number }[] = pokemon.stats?.map((s) => ({
-      name: s.stat.name,
-      value: s.base_stat,
-    }));
+    const stats: { name: string; value: number }[] = pokemon.stats?.map(
+      (s) => ({
+        name: s.stat.name,
+        value: s.base_stat,
+      }),
+    );
 
     const typeUrls: string[] = pokemon.types?.map((t) => t.type.url);
-    const typeResponses: Array<PokeAPIType | null> = await Promise.all(
+    const typeResponses: Array<Type | null> = await Promise.all(
       typeUrls.map(async (url) => {
         try {
           const r = await fetch(url);
           if (!r.ok) return null;
-          const data: PokeAPIType = await r.json();
+          const data: Type = await r.json();
           return data;
         } catch {
           return null;
@@ -167,19 +178,21 @@ export async function getEvolutionChain(
       `https://pokeapi.co/api/v2/pokemon-species/${name.toLowerCase()}`,
     );
     if (!speciesRes.ok) return [];
-    const species: PokeAPISpecies = await speciesRes.json();
+    const species: Species = await speciesRes.json();
     const evoUrl: string | undefined = species?.evolution_chain?.url;
     if (!evoUrl) return [];
 
     const evoRes = await fetch(evoUrl);
     if (!evoRes.ok) return [];
-    const evo: PokeAPIEvolutionChain = await evoRes.json();
+    const evo: EvolutionChain = await evoRes.json();
 
     const pairs: { name: string; stage: number }[] = [];
     const walk = (node: EvolutionNode, depth: number) => {
       if (node?.species?.name)
         pairs.push({ name: node.species.name, stage: depth });
-      (node?.evolves_to || []).forEach((child: EvolutionNode) => walk(child, depth + 1));
+      (node?.evolves_to || []).forEach((child: EvolutionNode) =>
+        walk(child, depth + 1),
+      );
     };
     walk(evo?.chain, 1);
     if (!pairs.length) return [];
@@ -191,7 +204,7 @@ export async function getEvolutionChain(
             `https://pokeapi.co/api/v2/pokemon/${n.toLowerCase()}`,
           );
           if (!pRes.ok) return null;
-          const p: PokeAPIPokemon = await pRes.json();
+          const p: Pokemon = await pRes.json();
           const image =
             p?.sprites?.other?.home?.front_default ??
             p?.sprites?.other?.["official-artwork"]?.front_default ??
