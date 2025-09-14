@@ -12,23 +12,25 @@ body {
 }
 
 body {
-  /* background-image: url("/image/background.webp"); */
   background-size: cover;
   font-family: Arial, Helvetica, sans-serif;
 }
 
-main {
+.home-grid {
   display: grid;
   grid-template-areas:
     "header header header"
-    "search search ."
-    "content content sidebar";
+    "search search search"
+    "content content content";
   grid-template-rows: auto 60px 1fr;
   gap: 36px;
 }
 
 .header {
   grid-area: header;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .search {
@@ -37,8 +39,4 @@ main {
 
 .content {
   grid-area: content;
-}
-
-.sidebar {
-  grid-area: sidebar;
 }

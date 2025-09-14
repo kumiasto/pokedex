@@ -23,7 +23,7 @@ const typeStyles = {
 };
 
 type PokemonTypeProps = {
-  types: Array<keyof typeof typeStyles>;
+  types: Array<string>;
 };
 
 function PokemonType({ types }: PokemonTypeProps) {
