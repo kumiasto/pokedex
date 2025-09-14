@@ -92,7 +92,7 @@ export default async function Page({ params }: PageProps) {
           <h1 className="text-4xl font-extrabold text-gray-900 capitalize">
             {pokemon.name}
           </h1>
-          <PokemonType types={pokemon.types as any} />
+          <PokemonType types={pokemon.types} />
         </div>
       </div>
 
@@ -135,7 +135,7 @@ export default async function Page({ params }: PageProps) {
         </p>
         {pokemon.weaknesses.length ? (
           <div className="flex justify-center">
-            <PokemonType types={pokemon.weaknesses as any} />
+            <PokemonType types={pokemon.weaknesses} />
           </div>
         ) : (
           <div className="flex justify-center">
@@ -172,7 +172,7 @@ export default async function Page({ params }: PageProps) {
                     Stage {p.stage}
                   </span>
                   <div className="scale-90">
-                    <PokemonType types={p.types as any} />
+                    <PokemonType types={p.types} />
                   </div>
                 </Link>
               ))}

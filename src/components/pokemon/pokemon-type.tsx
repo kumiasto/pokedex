@@ -23,7 +23,7 @@ const typeStyles = {
 };
 
 type PokemonTypeProps = {
-  types: Array<string>;
+  types: string[];
 };
 
 function PokemonType({ types }: PokemonTypeProps) {
@@ -34,7 +34,7 @@ function PokemonType({ types }: PokemonTypeProps) {
           key={type}
           className={clsx(
             "px-2 py-1 rounded-xl uppercase font-semibold text-[10px] text-gray-50",
-            typeStyles[type],
+            typeStyles[type as keyof typeof typeStyles],
           )}
         >
           {type}
