@@ -2,6 +2,10 @@
 
 A simple Pokédex built with Next.js App Router, TypeScript, and Tailwind CSS. Search Pokémon, browse an infinite list, and view detailed stats, weaknesses, and evolution chains.
 
+### Live Demo
+
+https://pokedex-nx9g.vercel.app
+
 ## Features
 
 - Search with URL syncing and debounce
