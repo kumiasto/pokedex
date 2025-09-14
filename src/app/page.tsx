@@ -6,9 +6,9 @@ import { getPokemons, getPokemon } from "@/lib/action";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { query?: string };
+  searchParams: Promise<{ query?: string }>;
 }) {
-  const { query } = searchParams;
+  const { query } = await searchParams;
 
   const initialPokemons = await getPokemons(0);
   const searchedPokemon = query ? await getPokemon(query) : null;
