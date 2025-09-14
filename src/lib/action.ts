@@ -1,11 +1,7 @@
-import type {
-  Pokemon,
-  PokemonDetails,
-  PokemonEvolution,
-} from "@/lib/types/pokemon";
+import type { Pokemon, PokemonDetails, PokemonEvolution } from "@/lib/types/pokemon";
 
-type TypesEntry = { type: { name: string; url: string } };
-type Sprites = {
+type TypesEntryRaw = { type: { name: string; url: string } };
+type SpritesRaw = {
   front_default?: string | null;
   other?: {
     home?: { front_default?: string | null };
@@ -13,23 +9,23 @@ type Sprites = {
     showdown?: { front_default?: string | null };
   };
 };
-type Ability = { ability: { name: string } };
-type Stat = { base_stat: number; stat: { name: string } };
-type Pokemon = {
+type AbilityRaw = { ability: { name: string } };
+type StatRaw = { base_stat: number; stat: { name: string } };
+type PokemonRaw = {
   id: number;
   name: string;
-  sprites: Sprites;
-  types: TypesEntry[];
-  abilities: Ability[];
-  stats: Stat[];
+  sprites: SpritesRaw;
+  types: TypesEntryRaw[];
+  abilities: AbilityRaw[];
+  stats: StatRaw[];
   height: number;
   weight: number;
   base_experience: number;
 };
-type Species = { evolution_chain?: { url?: string } };
+type SpeciesRaw = { evolution_chain?: { url?: string } };
 type EvolutionNode = { species: { name: string }; evolves_to: EvolutionNode[] };
-type EvolutionChain = { chain: EvolutionNode };
-type Type = { damage_relations?: { double_damage_from?: { name: string }[] } };
+type EvolutionChainRaw = { chain: EvolutionNode };
+type TypeResourceRaw = { damage_relations?: { double_damage_from?: { name: string }[] } };
 
 export async function getPokemon(
   query: string | undefined,
@@ -41,7 +37,7 @@ export async function getPokemon(
   try {
     const response = await fetch(API_URL);
     if (!response.ok) return null;
-    const pokemon: Pokemon = await response.json();
+    const pokemon: PokemonRaw = await response.json();
 
     const image =
       pokemon?.sprites?.other?.home?.front_default ??
@@ -68,20 +64,19 @@ export async function getPokemons(offset: number): Promise<Pokemon[]> {
   try {
     const response = await fetch(API_URL);
     if (!response.ok) return [];
-    const { results }: { results: { name: string; url: string }[] } =
-      await response.json();
+    const { results }: { results: { name: string; url: string }[] } = await response.json();
 
-    const pokemons: Array<Pokemon | null> = await Promise.all(
+    const pokemons: Array<PokemonRaw | null> = await Promise.all(
       results.map(async ({ url }) => {
         const res = await fetch(url);
         if (!res.ok) return null;
-        const poke: Pokemon = await res.json();
+        const poke: PokemonRaw = await res.json();
         return poke;
       }),
     );
 
     return pokemons
-      .filter((p): p is Pokemon => Boolean(p))
+      .filter((p): p is PokemonRaw => Boolean(p))
       .map((pokemon) => ({
         id: pokemon.id,
         name: pokemon.name,
@@ -108,7 +103,7 @@ export async function getPokemonDetails(
   try {
     const res = await fetch(API_URL);
     if (!res.ok) return null;
-    const pokemon: Pokemon = await res.json();
+    const pokemon: PokemonRaw = await res.json();
 
     const image =
       pokemon?.sprites?.other?.home?.front_default ??
@@ -129,12 +124,12 @@ export async function getPokemonDetails(
     );
 
     const typeUrls: string[] = pokemon.types?.map((t) => t.type.url);
-    const typeResponses: Array<Type | null> = await Promise.all(
+    const typeResponses: Array<TypeResourceRaw | null> = await Promise.all(
       typeUrls.map(async (url) => {
         try {
           const r = await fetch(url);
           if (!r.ok) return null;
-          const data: Type = await r.json();
+          const data: TypeResourceRaw = await r.json();
           return data;
         } catch {
           return null;
@@ -178,13 +173,13 @@ export async function getEvolutionChain(
       `https://pokeapi.co/api/v2/pokemon-species/${name.toLowerCase()}`,
     );
     if (!speciesRes.ok) return [];
-    const species: Species = await speciesRes.json();
+    const species: SpeciesRaw = await speciesRes.json();
     const evoUrl: string | undefined = species?.evolution_chain?.url;
     if (!evoUrl) return [];
 
     const evoRes = await fetch(evoUrl);
     if (!evoRes.ok) return [];
-    const evo: EvolutionChain = await evoRes.json();
+    const evo: EvolutionChainRaw = await evoRes.json();
 
     const pairs: { name: string; stage: number }[] = [];
     const walk = (node: EvolutionNode, depth: number) => {
@@ -204,7 +199,7 @@ export async function getEvolutionChain(
             `https://pokeapi.co/api/v2/pokemon/${n.toLowerCase()}`,
           );
           if (!pRes.ok) return null;
-          const p: Pokemon = await pRes.json();
+          const p: PokemonRaw = await pRes.json();
           const image =
             p?.sprites?.other?.home?.front_default ??
             p?.sprites?.other?.["official-artwork"]?.front_default ??

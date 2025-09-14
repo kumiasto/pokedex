@@ -9,7 +9,7 @@ function SearchInput() {
   const pathname = usePathname();
   const { replace } = useRouter();
 
-  const handleSearch = debounce((value: string) => {
+  const handleSearch = debounce<[(string | undefined)]>((value) => {
     const params = new URLSearchParams(searchParams);
     if (value) {
       params.set("query", value);

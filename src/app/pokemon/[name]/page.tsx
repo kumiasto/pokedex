@@ -36,11 +36,11 @@ function PokemonData({ label, data, className }: PokemonDataProps) {
 }
 
 type PageProps = {
-  params: { name: string };
+  params: Promise<{ name: string }>;
 };
 
 export default async function Page({ params }: PageProps) {
-  const { name } = params;
+  const { name } = await params;
   const [pokemon, evolution] = await Promise.all([
     getPokemonDetails(name),
     getEvolutionChain(name),

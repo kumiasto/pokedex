@@ -6,7 +6,7 @@ import { getPokemons } from "@/lib/action";
 import { usePathname, useRouter } from "next/navigation";
 import type { Pokemon as PokemonType } from "@/lib/types/pokemon";
 
-const ListWrapper = ({ children }) => (
+const ListWrapper = ({ children }: { children: React.ReactNode }) => (
   <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-12">
     {children}
   </div>
