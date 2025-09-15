@@ -7,7 +7,13 @@ import { useRouter } from "next/navigation";
 import type { Pokemon } from "@/lib/types/pokemon";
 import clsx from "clsx";
 
-function Pokemon({ pokemon, priority = false }: { pokemon: Pokemon; priority?: boolean }) {
+function Pokemon({
+  pokemon,
+  priority = false,
+}: {
+  pokemon: Pokemon;
+  priority?: boolean;
+}) {
   const router = useRouter();
   const [loaded, setLoaded] = useState(false);
 
@@ -28,7 +34,7 @@ function Pokemon({ pokemon, priority = false }: { pokemon: Pokemon; priority?: b
           )}
           sizes="75px"
           priority={priority}
-          onLoadingComplete={() => setLoaded(true)}
+          onLoad={() => setLoaded(true)}
         />
       </div>
       <h2 className="text-xl font-bold mt-10 text-gray-900 capitalize">

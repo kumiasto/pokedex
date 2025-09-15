@@ -15,7 +15,7 @@ export default function BackLink({
   return (
     <button
       type="button"
-      onClick={() => (typeof window !== "undefined" && window.history.length > 1 ? router.back() : router.push("/"))}
+      onClick={() => router.push("/")}
       aria-label={label}
       className={
         "cursor-pointer inline-flex items-center justify-center w-9 h-9 rounded-full  text-gray-600 hover:text-gray-900 hover:bg-gray-200 transition " +

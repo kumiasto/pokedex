@@ -1,31 +1,13 @@
-import type { Pokemon, PokemonDetails, PokemonEvolution } from "@/lib/types/pokemon";
-
-type TypesEntryRaw = { type: { name: string; url: string } };
-type SpritesRaw = {
-  front_default?: string | null;
-  other?: {
-    home?: { front_default?: string | null };
-    ["official-artwork"]?: { front_default?: string | null };
-    showdown?: { front_default?: string | null };
-  };
-};
-type AbilityRaw = { ability: { name: string } };
-type StatRaw = { base_stat: number; stat: { name: string } };
-type PokemonRaw = {
-  id: number;
-  name: string;
-  sprites: SpritesRaw;
-  types: TypesEntryRaw[];
-  abilities: AbilityRaw[];
-  stats: StatRaw[];
-  height: number;
-  weight: number;
-  base_experience: number;
-};
-type SpeciesRaw = { evolution_chain?: { url?: string } };
-type EvolutionNode = { species: { name: string }; evolves_to: EvolutionNode[] };
-type EvolutionChainRaw = { chain: EvolutionNode };
-type TypeResourceRaw = { damage_relations?: { double_damage_from?: { name: string }[] } };
+import type {
+  EvolutionChainRaw,
+  EvolutionNode,
+  Pokemon,
+  PokemonDetails,
+  PokemonEvolution,
+  PokemonRaw,
+  SpeciesRaw,
+  TypeResourceRaw,
+} from "@/lib/types/pokemon";
 
 export async function getPokemon(
   query: string | undefined,
@@ -65,7 +47,8 @@ export async function getPokemons(offset: number): Promise<Pokemon[]> {
   try {
     const response = await fetch(API_URL);
     if (!response.ok) return [];
-    const { results }: { results: { name: string; url: string }[] } = await response.json();
+    const { results }: { results: { name: string; url: string }[] } =
+      await response.json();
 
     const pokemons: Array<PokemonRaw | null> = await Promise.all(
       results.map(async ({ url }) => {
@@ -183,16 +166,18 @@ export async function getEvolutionChain(
     if (!evoRes.ok) return [];
     const evo: EvolutionChainRaw = await evoRes.json();
 
-    const pairs: { name: string; stage: number }[] = [];
-    const walk = (node: EvolutionNode, depth: number) => {
-      if (node?.species?.name)
-        pairs.push({ name: node.species.name, stage: depth });
-      (node?.evolves_to || []).forEach((child: EvolutionNode) =>
-        walk(child, depth + 1),
-      );
-    };
-    walk(evo?.chain, 1);
-    if (!pairs.length) return [];
+    type EvoPair = { name: string; stage: number };
+
+    const flattenEvolution = (node?: EvolutionNode, stage = 1): EvoPair[] =>
+      node
+        ? (node.evolves_to ?? []).reduce<EvoPair[]>(
+            (acc, curr) => acc.concat(flattenEvolution(curr, stage + 1)),
+            node.species?.name ? [{ name: node.species.name, stage }] : [],
+          )
+        : [];
+
+    const pairs = flattenEvolution(evo?.chain, 1);
+    if (pairs.length === 0) return [];
 
     const entries = await Promise.all(
       pairs.map(async ({ name: n, stage }) => {
